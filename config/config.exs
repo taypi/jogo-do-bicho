@@ -7,9 +7,22 @@
 # General application configuration
 import Config
 
+config :jogo_do_bicho, :scopes,
+  user: [
+    default: true,
+    module: JogoDoBicho.Accounts.Scope,
+    assign_key: :current_scope,
+    access_path: [:user, :id],
+    schema_key: :user_id,
+    schema_type: :binary_id,
+    schema_table: :users,
+    test_data_fixture: JogoDoBicho.AccountsFixtures,
+    test_setup_helper: :register_and_log_in_user
+  ]
+
 config :jogo_do_bicho,
   ecto_repos: [JogoDoBicho.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime, binary_id: true]
 
 # Configure the endpoint
 config :jogo_do_bicho, JogoDoBichoWeb.Endpoint,
