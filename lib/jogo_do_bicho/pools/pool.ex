@@ -2,6 +2,7 @@ defmodule JogoDoBicho.Pools.Pool do
   use Ecto.Schema
 
   import Ecto.Changeset
+  import Ecto.Query
 
   alias JogoDoBicho.Accounts.Scope
   alias JogoDoBicho.Accounts.User
@@ -21,6 +22,12 @@ defmodule JogoDoBicho.Pools.Pool do
     many_to_many :members, User, join_through: PoolMember
 
     timestamps(type: :utc_datetime)
+  end
+
+  def scope(query \\ __MODULE__, %Scope{} = scope) do
+    query
+    |> join(:inner, [p], pm in PoolMember, on: pm.pool_id == p.id)
+    |> where([_p, pm], pm.user_id == ^scope.user.id)
   end
 
   def changeset(pool \\ %__MODULE__{}, attrs, %Scope{} = scope) do
