@@ -19,6 +19,7 @@ defmodule JogoDoBicho.Tournaments.Tournament do
     tournament
     |> cast(attrs, [:name, :start_date, :end_date])
     |> validate_required([:name, :start_date, :end_date])
+    |> unique_constraint(:name)
     |> validate_date_range()
   end
 

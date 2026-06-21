@@ -2,6 +2,9 @@ defmodule JogoDoBicho.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias JogoDoBicho.Pools.PoolMember
+  alias JogoDoBicho.Pools.Pool
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
