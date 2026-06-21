@@ -22,8 +22,15 @@ defmodule JogoDoBichoWeb.PoolLive.Show do
 
       <.list>
         <:item title="Name">{@pool.name}</:item>
-        <:item title="Invite link">{@pool.name}</:item>
-      </.list>
+        <:item title="Invite Link">
+          <input
+            type="text"
+            readonly
+            value={url(~p"/pools/join/#{@pool.invite_token}")}
+            class="input"
+          />
+        </:item>
+        </.list>
     </Layouts.app>
     """
   end

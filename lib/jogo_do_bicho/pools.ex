@@ -8,6 +8,7 @@ defmodule JogoDoBicho.Pools do
   alias JogoDoBicho.Pools.Services.DeletePool
   alias JogoDoBicho.Repo
   alias JogoDoBicho.Pools.Pool
+  alias JogoDoBicho.Pools.PoolMember
   alias JogoDoBicho.Pools.Services.CreatePool
   alias JogoDoBicho.Pools.Services.UpdatePool
   alias JogoDoBicho.Accounts.Scope
@@ -56,6 +57,14 @@ defmodule JogoDoBicho.Pools do
     with {:ok, pool} <- DeletePool.call(scope, pool) do
       broadcast_all(scope, pool, {:deleted, pool})
 
+      {:ok, pool}
+    end
+  end
+
+  def join_pool(%Scope{} = scope, invite_token) do
+    pool = Repo.get_by!(Pool, invite_token: invite_token)
+
+    with {:ok, _} <- Repo.insert(PoolMember.changeset(%{pool_id: pool.id, user_id: scope.user.id})) do
       {:ok, pool}
     end
   end

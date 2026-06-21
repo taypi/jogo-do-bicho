@@ -3,7 +3,7 @@ defmodule JogoDoBicho.Pools.Services.ValidateScope do
   alias JogoDoBicho.Accounts.Scope
 
   def call(%Scope{} = scope, %Pool{} = pool) do
-    if pool.owner_id == scope.user.id do
+    if Pool.owner?(pool, scope.user.id) do
       :ok
     else
       {:error, :not_found}

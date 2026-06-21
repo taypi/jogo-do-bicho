@@ -59,6 +59,7 @@ defmodule JogoDoBichoWeb.Router do
       live "/pools/new", PoolLive.Form, :new
       live "/pools/:id", PoolLive.Show, :show
       live "/pools/:id/edit", PoolLive.Form, :edit
+      live "/pools/join/:invite_token", PoolLive.Join, :join
     end
 
     post "/users/update-password", UserSessionController, :update_password

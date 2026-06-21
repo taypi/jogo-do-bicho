@@ -30,6 +30,8 @@ defmodule JogoDoBicho.Pools.Pool do
     |> where([_p, pm], pm.user_id == ^scope.user.id)
   end
 
+  def owner?(%__MODULE__{} = pool, user_id), do: pool.owner_id == user_id
+
   def changeset(pool \\ %__MODULE__{}, attrs, %Scope{} = scope) do
     pool
     |> cast(attrs, [:name, :tournament_id])
