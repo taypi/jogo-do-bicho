@@ -11,6 +11,9 @@ defmodule JogoDoBicho.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
+    has_many :pool_members, PoolMember
+    many_to_many :pools, Pool, join_through: PoolMember
+
     timestamps(type: :utc_datetime)
   end
 

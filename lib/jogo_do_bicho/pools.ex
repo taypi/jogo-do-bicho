@@ -144,4 +144,143 @@ defmodule JogoDoBicho.Pools do
 
     Pool.changeset(pool, attrs, scope)
   end
+
+  alias JogoDoBicho.Pools.PoolMember
+  alias JogoDoBicho.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any pool_member changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %PoolMember{}}
+    * {:updated, %PoolMember{}}
+    * {:deleted, %PoolMember{}}
+
+  """
+  def subscribe_pool_members(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(JogoDoBicho.PubSub, "user:#{key}:pool_members")
+  end
+
+  defp broadcast_pool_member(%Scope{} = scope, message) do
+    key = scope.user.id
+
+    Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:pool_members", message)
+  end
+
+  @doc """
+  Returns the list of pool_members.
+
+  ## Examples
+
+      iex> list_pool_members(scope)
+      [%PoolMember{}, ...]
+
+  """
+  def list_pool_members(%Scope{} = scope) do
+    Repo.all_by(PoolMember, user_id: scope.user.id)
+  end
+
+  @doc """
+  Gets a single pool_member.
+
+  Raises `Ecto.NoResultsError` if the Pool member does not exist.
+
+  ## Examples
+
+      iex> get_pool_member!(scope, 123)
+      %PoolMember{}
+
+      iex> get_pool_member!(scope, 456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_pool_member!(%Scope{} = scope, id) do
+    Repo.get_by!(PoolMember, id: id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a pool_member.
+
+  ## Examples
+
+      iex> create_pool_member(scope, %{field: value})
+      {:ok, %PoolMember{}}
+
+      iex> create_pool_member(scope, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_pool_member(%Scope{} = scope, attrs) do
+    with {:ok, pool_member = %PoolMember{}} <-
+           %PoolMember{}
+           |> PoolMember.changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast_pool_member(scope, {:created, pool_member})
+      {:ok, pool_member}
+    end
+  end
+
+  @doc """
+  Updates a pool_member.
+
+  ## Examples
+
+      iex> update_pool_member(scope, pool_member, %{field: new_value})
+      {:ok, %PoolMember{}}
+
+      iex> update_pool_member(scope, pool_member, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_pool_member(%Scope{} = scope, %PoolMember{} = pool_member, attrs) do
+    true = pool_member.user_id == scope.user.id
+
+    with {:ok, pool_member = %PoolMember{}} <-
+           pool_member
+           |> PoolMember.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast_pool_member(scope, {:updated, pool_member})
+      {:ok, pool_member}
+    end
+  end
+
+  @doc """
+  Deletes a pool_member.
+
+  ## Examples
+
+      iex> delete_pool_member(scope, pool_member)
+      {:ok, %PoolMember{}}
+
+      iex> delete_pool_member(scope, pool_member)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_pool_member(%Scope{} = scope, %PoolMember{} = pool_member) do
+    true = pool_member.user_id == scope.user.id
+
+    with {:ok, pool_member = %PoolMember{}} <-
+           Repo.delete(pool_member) do
+      broadcast_pool_member(scope, {:deleted, pool_member})
+      {:ok, pool_member}
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking pool_member changes.
+
+  ## Examples
+
+      iex> change_pool_member(scope, pool_member)
+      %Ecto.Changeset{data: %PoolMember{}}
+
+  """
+  def change_pool_member(%Scope{} = scope, %PoolMember{} = pool_member, attrs \\ %{}) do
+    true = pool_member.user_id == scope.user.id
+
+    PoolMember.changeset(pool_member, attrs, scope)
+  end
 end

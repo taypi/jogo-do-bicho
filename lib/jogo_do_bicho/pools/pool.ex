@@ -4,7 +4,7 @@ defmodule JogoDoBicho.Pools.Pool do
   import Ecto.Changeset
 
   alias JogoDoBicho.Accounts.User
-  # alias JogoDoBicho.Pools.PoolMember
+  alias JogoDoBicho.Pools.PoolMember
   alias JogoDoBicho.Tournaments.Tournament
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -16,7 +16,8 @@ defmodule JogoDoBicho.Pools.Pool do
     belongs_to :owner, User
     belongs_to :tournament, Tournament
 
-    # has_many :pool_members, PoolMember
+    has_many :pool_members, PoolMember
+    many_to_many :members, User, join_through: PoolMember
 
     timestamps(type: :utc_datetime)
   end

@@ -9,7 +9,9 @@ defmodule JogoDoBicho.Repo.Migrations.CreatePools do
       add :invite_token, :string, null: false
 
       add :owner_id, references(:users, type: :binary_id, on_delete: :nothing), null: false
-      add :tournament_id, references(:tournaments, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :tournament_id, references(:tournaments, type: :binary_id, on_delete: :delete_all),
+        null: false
 
       timestamps(type: :utc_datetime)
     end
