@@ -54,6 +54,11 @@ defmodule JogoDoBichoWeb.Router do
       on_mount: [{JogoDoBichoWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+
+      live "/pools", PoolLive.Index, :index
+      live "/pools/new", PoolLive.Form, :new
+      live "/pools/:id", PoolLive.Show, :show
+      live "/pools/:id/edit", PoolLive.Form, :edit
     end
 
     post "/users/update-password", UserSessionController, :update_password

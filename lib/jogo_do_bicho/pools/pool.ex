@@ -36,8 +36,15 @@ defmodule JogoDoBicho.Pools.Pool do
     |> put_change(:owner_id, scope.user.id)
     |> put_change(:invite_token, generate_invite_token())
     |> validate_required([:name, :tournament_id])
-    |> validate_length(:name, min: 3, max: 255)
+    |> validate_name()
     |> unique_constraint(:invite_token)
+  end
+
+  def update_changeset(%__MODULE__{} = pool, attrs) do
+    pool
+    |> cast(attrs, [:name])
+    |> validate_required([:name])
+    |> validate_name()
   end
 
   defp generate_invite_token do
@@ -45,4 +52,6 @@ defmodule JogoDoBicho.Pools.Pool do
     |> :crypto.strong_rand_bytes()
     |> Base.url_encode64(padding: false)
   end
+
+  defp validate_name(changes), do: validate_length(changes, :name, min: 3, max: 255)
 end
