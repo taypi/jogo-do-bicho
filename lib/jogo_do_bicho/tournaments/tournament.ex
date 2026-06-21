@@ -15,7 +15,7 @@ defmodule JogoDoBicho.Tournaments.Tournament do
   end
 
   @doc false
-  def changeset(tournament, attrs) do
+  def changeset(tournament \\ %__MODULE__{}, attrs) do
     tournament
     |> cast(attrs, [:name, :start_date, :end_date])
     |> validate_required([:name, :start_date, :end_date])
