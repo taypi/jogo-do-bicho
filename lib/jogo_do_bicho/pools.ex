@@ -8,6 +8,8 @@ defmodule JogoDoBicho.Pools do
 
   alias JogoDoBicho.Pools.Pool
   alias JogoDoBicho.Accounts.Scope
+  alias JogoDoBicho.Pools.PoolMember
+  alias JogoDoBicho.Accounts.Scope
 
   @doc """
   Subscribes to scoped notifications about any pool changes.
@@ -75,13 +77,20 @@ defmodule JogoDoBicho.Pools do
 
   """
   def create_pool(%Scope{} = scope, attrs) do
-    with {:ok, pool = %Pool{}} <-
-           %Pool{}
-           |> Pool.changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_pool(scope, {:created, pool})
-      {:ok, pool}
-    end
+    Repo.transaction(fn ->
+      {:ok, pool} =
+        attrs
+        |> Pool.changeset(scope)
+        |> Repo.insert()
+
+      PoolMember.changeset(%{
+        pool_id: pool.id,
+        user_id: scope.user.id
+      })
+      |> Repo.insert!()
+
+      pool
+    end)
   end
 
   @doc """
@@ -145,8 +154,37 @@ defmodule JogoDoBicho.Pools do
     Pool.changeset(pool, attrs, scope)
   end
 
-  alias JogoDoBicho.Pools.PoolMember
-  alias JogoDoBicho.Accounts.Scope
+  def join_pool(%Scope{} = scope, invite_token) do
+    Repo.transaction(fn ->
+      pool = Repo.get_by!(Pool, invite_token: invite_token)
+
+      PoolMember.changeset(%{
+        pool_id: pool.id,
+        user_id: scope.user.id
+      })
+      |> Repo.insert!()
+
+      pool
+    end)
+  end
+
+  def get_pool_by_invite_token!(invite_token) do
+    Repo.get_by!(Pool, invite_token: invite_token)
+  end
+
+  def list_user_pools(%Scope{} = scope) do
+    Pool
+    |> join(:inner, [p], pm in PoolMember, on: pm.pool_id == p.id)
+    |> where([_p, pm], pm.user_id == ^scope.user.id)
+    |> Repo.all()
+  end
+
+  def list_pool_members(%Pool{} = pool) do
+    PoolMember
+    |> where([pm], pm.pool_id == ^pool.id)
+    |> preload(:user)
+    |> Repo.all()
+  end
 
   @doc """
   Subscribes to scoped notifications about any pool_member changes.

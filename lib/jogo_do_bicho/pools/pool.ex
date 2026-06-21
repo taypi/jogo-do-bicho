@@ -3,6 +3,7 @@ defmodule JogoDoBicho.Pools.Pool do
 
   import Ecto.Changeset
 
+  alias JogoDoBicho.Accounts.Scope
   alias JogoDoBicho.Accounts.User
   alias JogoDoBicho.Pools.PoolMember
   alias JogoDoBicho.Tournaments.Tournament
@@ -22,39 +23,14 @@ defmodule JogoDoBicho.Pools.Pool do
     timestamps(type: :utc_datetime)
   end
 
-  def changeset(pool \\ %__MODULE__{}, attrs) do
+  def changeset(pool \\ %__MODULE__{}, attrs, %Scope{} = scope) do
     pool
-    |> cast(attrs, [
-      :name,
-      :invite_token,
-      :owner_id,
-      :tournament_id
-    ])
-    |> validate_required([
-      :name,
-      :owner_id,
-      :tournament_id
-    ])
-    |> validate_length(:name,
-      min: 3,
-      max: 255
-    )
-    |> maybe_put_invite_token()
+    |> cast(attrs, [:name, :tournament_id])
+    |> put_change(:owner_id, scope.user.id)
+    |> put_change(:invite_token, generate_invite_token())
+    |> validate_required([:name, :tournament_id])
+    |> validate_length(:name, min: 3, max: 255)
     |> unique_constraint(:invite_token)
-  end
-
-  defp maybe_put_invite_token(changeset) do
-    case get_field(changeset, :invite_token) do
-      nil ->
-        put_change(
-          changeset,
-          :invite_token,
-          generate_invite_token()
-        )
-
-      _ ->
-        changeset
-    end
   end
 
   defp generate_invite_token do
