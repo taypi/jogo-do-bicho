@@ -113,4 +113,88 @@ defmodule JogoDoBicho.TournamentsTest do
       assert %Ecto.Changeset{} = Tournaments.change_tournament(scope, tournament)
     end
   end
+
+  describe "tournament_teams" do
+    alias JogoDoBicho.Tournaments.TournamentTeam
+
+    import JogoDoBicho.AccountsFixtures, only: [user_scope_fixture: 0]
+    import JogoDoBicho.TournamentsFixtures
+
+    @invalid_attrs %{}
+
+    test "list_tournament_teams/1 returns all scoped tournament_teams" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+      other_tournament_team = tournament_team_fixture(other_scope)
+      assert Tournaments.list_tournament_teams(scope) == [tournament_team]
+      assert Tournaments.list_tournament_teams(other_scope) == [other_tournament_team]
+    end
+
+    test "get_tournament_team!/2 returns the tournament_team with given id" do
+      scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Tournaments.get_tournament_team!(scope, tournament_team.id) == tournament_team
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_tournament_team!(other_scope, tournament_team.id) end
+    end
+
+    test "create_tournament_team/2 with valid data creates a tournament_team" do
+      valid_attrs = %{}
+      scope = user_scope_fixture()
+
+      assert {:ok, %TournamentTeam{} = tournament_team} = Tournaments.create_tournament_team(scope, valid_attrs)
+      assert tournament_team.user_id == scope.user.id
+    end
+
+    test "create_tournament_team/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      assert {:error, %Ecto.Changeset{}} = Tournaments.create_tournament_team(scope, @invalid_attrs)
+    end
+
+    test "update_tournament_team/3 with valid data updates the tournament_team" do
+      scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+      update_attrs = %{}
+
+      assert {:ok, %TournamentTeam{} = tournament_team} = Tournaments.update_tournament_team(scope, tournament_team, update_attrs)
+    end
+
+    test "update_tournament_team/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Tournaments.update_tournament_team(other_scope, tournament_team, %{})
+      end
+    end
+
+    test "update_tournament_team/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+      assert {:error, %Ecto.Changeset{}} = Tournaments.update_tournament_team(scope, tournament_team, @invalid_attrs)
+      assert tournament_team == Tournaments.get_tournament_team!(scope, tournament_team.id)
+    end
+
+    test "delete_tournament_team/2 deletes the tournament_team" do
+      scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+      assert {:ok, %TournamentTeam{}} = Tournaments.delete_tournament_team(scope, tournament_team)
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_tournament_team!(scope, tournament_team.id) end
+    end
+
+    test "delete_tournament_team/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+      assert_raise MatchError, fn -> Tournaments.delete_tournament_team(other_scope, tournament_team) end
+    end
+
+    test "change_tournament_team/2 returns a tournament_team changeset" do
+      scope = user_scope_fixture()
+      tournament_team = tournament_team_fixture(scope)
+      assert %Ecto.Changeset{} = Tournaments.change_tournament_team(scope, tournament_team)
+    end
+  end
 end

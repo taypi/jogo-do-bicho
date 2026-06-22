@@ -18,4 +18,17 @@ defmodule JogoDoBicho.TournamentsFixtures do
     {:ok, tournament} = JogoDoBicho.Tournaments.create_tournament(scope, attrs)
     tournament
   end
+
+  @doc """
+  Generate a tournament_team.
+  """
+  def tournament_team_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+
+      })
+
+    {:ok, tournament_team} = JogoDoBicho.Tournaments.create_tournament_team(scope, attrs)
+    tournament_team
+  end
 end
