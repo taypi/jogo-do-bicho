@@ -182,4 +182,143 @@ end
 
     TournamentTeam.changeset(tournament_team, attrs, scope)
   end
+
+  alias JogoDoBicho.Tournaments.Stage
+  alias JogoDoBicho.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any stage changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %Stage{}}
+    * {:updated, %Stage{}}
+    * {:deleted, %Stage{}}
+
+  """
+  def subscribe_stages(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(JogoDoBicho.PubSub, "user:#{key}:stages")
+  end
+
+  defp broadcast_stage(%Scope{} = scope, message) do
+    key = scope.user.id
+
+    Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:stages", message)
+  end
+
+  @doc """
+  Returns the list of stages.
+
+  ## Examples
+
+      iex> list_stages(scope)
+      [%Stage{}, ...]
+
+  """
+  def list_stages(%Scope{} = scope) do
+    Repo.all_by(Stage, user_id: scope.user.id)
+  end
+
+  @doc """
+  Gets a single stage.
+
+  Raises `Ecto.NoResultsError` if the Stage does not exist.
+
+  ## Examples
+
+      iex> get_stage!(scope, 123)
+      %Stage{}
+
+      iex> get_stage!(scope, 456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_stage!(%Scope{} = scope, id) do
+    Repo.get_by!(Stage, id: id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a stage.
+
+  ## Examples
+
+      iex> create_stage(scope, %{field: value})
+      {:ok, %Stage{}}
+
+      iex> create_stage(scope, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_stage(%Scope{} = scope, attrs) do
+    with {:ok, stage = %Stage{}} <-
+           %Stage{}
+           |> Stage.changeset(attrs, scope)
+           |> Repo.insert() do
+      broadcast_stage(scope, {:created, stage})
+      {:ok, stage}
+    end
+  end
+
+  @doc """
+  Updates a stage.
+
+  ## Examples
+
+      iex> update_stage(scope, stage, %{field: new_value})
+      {:ok, %Stage{}}
+
+      iex> update_stage(scope, stage, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_stage(%Scope{} = scope, %Stage{} = stage, attrs) do
+    true = stage.user_id == scope.user.id
+
+    with {:ok, stage = %Stage{}} <-
+           stage
+           |> Stage.changeset(attrs, scope)
+           |> Repo.update() do
+      broadcast_stage(scope, {:updated, stage})
+      {:ok, stage}
+    end
+  end
+
+  @doc """
+  Deletes a stage.
+
+  ## Examples
+
+      iex> delete_stage(scope, stage)
+      {:ok, %Stage{}}
+
+      iex> delete_stage(scope, stage)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_stage(%Scope{} = scope, %Stage{} = stage) do
+    true = stage.user_id == scope.user.id
+
+    with {:ok, stage = %Stage{}} <-
+           Repo.delete(stage) do
+      broadcast_stage(scope, {:deleted, stage})
+      {:ok, stage}
+    end
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking stage changes.
+
+  ## Examples
+
+      iex> change_stage(scope, stage)
+      %Ecto.Changeset{data: %Stage{}}
+
+  """
+  def change_stage(%Scope{} = scope, %Stage{} = stage, attrs \\ %{}) do
+    true = stage.user_id == scope.user.id
+
+    Stage.changeset(stage, attrs, scope)
+  end
 end

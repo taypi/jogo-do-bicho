@@ -197,4 +197,92 @@ defmodule JogoDoBicho.TournamentsTest do
       assert %Ecto.Changeset{} = Tournaments.change_tournament_team(scope, tournament_team)
     end
   end
+
+  describe "stages" do
+    alias JogoDoBicho.Tournaments.Stage
+
+    import JogoDoBicho.AccountsFixtures, only: [user_scope_fixture: 0]
+    import JogoDoBicho.TournamentsFixtures
+
+    @invalid_attrs %{name: nil, type: nil}
+
+    test "list_stages/1 returns all scoped stages" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+      other_stage = stage_fixture(other_scope)
+      assert Tournaments.list_stages(scope) == [stage]
+      assert Tournaments.list_stages(other_scope) == [other_stage]
+    end
+
+    test "get_stage!/2 returns the stage with given id" do
+      scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Tournaments.get_stage!(scope, stage.id) == stage
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_stage!(other_scope, stage.id) end
+    end
+
+    test "create_stage/2 with valid data creates a stage" do
+      valid_attrs = %{name: "some name", type: "some type"}
+      scope = user_scope_fixture()
+
+      assert {:ok, %Stage{} = stage} = Tournaments.create_stage(scope, valid_attrs)
+      assert stage.name == "some name"
+      assert stage.type == "some type"
+      assert stage.user_id == scope.user.id
+    end
+
+    test "create_stage/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      assert {:error, %Ecto.Changeset{}} = Tournaments.create_stage(scope, @invalid_attrs)
+    end
+
+    test "update_stage/3 with valid data updates the stage" do
+      scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+      update_attrs = %{name: "some updated name", type: "some updated type"}
+
+      assert {:ok, %Stage{} = stage} = Tournaments.update_stage(scope, stage, update_attrs)
+      assert stage.name == "some updated name"
+      assert stage.type == "some updated type"
+    end
+
+    test "update_stage/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Tournaments.update_stage(other_scope, stage, %{})
+      end
+    end
+
+    test "update_stage/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+      assert {:error, %Ecto.Changeset{}} = Tournaments.update_stage(scope, stage, @invalid_attrs)
+      assert stage == Tournaments.get_stage!(scope, stage.id)
+    end
+
+    test "delete_stage/2 deletes the stage" do
+      scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+      assert {:ok, %Stage{}} = Tournaments.delete_stage(scope, stage)
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_stage!(scope, stage.id) end
+    end
+
+    test "delete_stage/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+      assert_raise MatchError, fn -> Tournaments.delete_stage(other_scope, stage) end
+    end
+
+    test "change_stage/2 returns a stage changeset" do
+      scope = user_scope_fixture()
+      stage = stage_fixture(scope)
+      assert %Ecto.Changeset{} = Tournaments.change_stage(scope, stage)
+    end
+  end
 end
