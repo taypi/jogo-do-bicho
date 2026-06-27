@@ -7,6 +7,7 @@ defmodule JogoDoBicho.Tournaments do
   alias JogoDoBicho.Repo
 
   alias JogoDoBicho.Tournaments.Tournament
+  alias JogoDoBicho.Tournaments.Stage
 
   def list_tournaments do
     Repo.all(Tournament)
@@ -189,19 +190,6 @@ end
 
   #   Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:stages", message)
   # end
-
-  @doc """
-  Returns the list of stages.
-
-  ## Examples
-
-      iex> list_stages(scope)
-      [%Stage{}, ...]
-
-  """
-  def list_stages(%Scope{} = scope) do
-    Repo.all_by(Stage, user_id: scope.user.id)
-  end
 
   @doc """
   Gets a single stage.
@@ -475,14 +463,10 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_match(%Scope{} = scope, attrs) do
-    with {:ok, match = %Match{}} <-
-           %Match{}
-           |> Match.changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_match(scope, {:created, match})
-      {:ok, match}
-    end
+  def create_match(attrs) do
+    %Match{}
+    |> Match.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -497,16 +481,10 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_match(%Scope{} = scope, %Match{} = match, attrs) do
-    true = match.user_id == scope.user.id
-
-    with {:ok, match = %Match{}} <-
-           match
-           |> Match.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_match(scope, {:updated, match})
-      {:ok, match}
-    end
+  def update_match(%Match{} = match, attrs) do
+    match
+    |> Match.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -521,14 +499,8 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_match(%Scope{} = scope, %Match{} = match) do
-    true = match.user_id == scope.user.id
-
-    with {:ok, match = %Match{}} <-
-           Repo.delete(match) do
-      broadcast_match(scope, {:deleted, match})
-      {:ok, match}
-    end
+  def delete_match(%Match{} = match) do
+    Repo.delete(match)
   end
 
   @doc """
@@ -540,9 +512,15 @@ end
       %Ecto.Changeset{data: %Match{}}
 
   """
-  def change_match(%Scope{} = scope, %Match{} = match, attrs \\ %{}) do
-    true = match.user_id == scope.user.id
+  def change_match(%Match{} = match, attrs \\ %{}) do
+    Match.changeset(match, attrs)
+  end
 
-    Match.changeset(match, attrs, scope)
+  def list_stages(%Tournament{id: tournament_id}) do
+    Stage
+    |> where([s], s.tournament_id == ^tournament_id)
+    |> order_by([s], s.inserted_at)
+    |> preload(matches: [:slot_a, :slot_b])
+    |> Repo.all()
   end
 end

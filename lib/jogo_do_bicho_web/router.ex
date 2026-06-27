@@ -60,6 +60,8 @@ defmodule JogoDoBichoWeb.Router do
       live "/pools/:id", PoolLive.Show, :show
       live "/pools/:id/edit", PoolLive.Form, :edit
       live "/pools/join/:invite_token", PoolLive.Join, :join
+
+      live "/tournaments/:id/bracket", TournamentLive.Bracket, :show
     end
 
     post "/users/update-password", UserSessionController, :update_password

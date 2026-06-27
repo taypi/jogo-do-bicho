@@ -2,6 +2,7 @@ defmodule JogoDoBicho.Tournaments.Stage do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias JogoDoBicho.Tournaments.Match
   alias JogoDoBicho.Tournaments.Tournament
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -18,6 +19,7 @@ defmodule JogoDoBicho.Tournaments.Stage do
       :final
     ]
 
+    has_many :matches, Match
     belongs_to :tournament, Tournament
 
     timestamps(type: :utc_datetime)

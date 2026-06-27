@@ -31,8 +31,7 @@ defmodule JogoDoBicho.Tournaments.Match do
     |> validate_required([
       :stage_id,
       :slot_a_id,
-      :slot_b_id,
-      :kickoff_at
+      :slot_b_id
     ])
     |> validate_number(:score_a, greater_than_or_equal_to: 0)
     |> validate_number(:score_b, greater_than_or_equal_to: 0)
