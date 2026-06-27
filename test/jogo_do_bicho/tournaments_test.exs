@@ -371,4 +371,94 @@ defmodule JogoDoBicho.TournamentsTest do
       assert %Ecto.Changeset{} = Tournaments.change_slot(scope, slot)
     end
   end
+
+  describe "matches" do
+    alias JogoDoBicho.Tournaments.Match
+
+    import JogoDoBicho.AccountsFixtures, only: [user_scope_fixture: 0]
+    import JogoDoBicho.TournamentsFixtures
+
+    @invalid_attrs %{kickoff_at: nil, score_a: nil, score_b: nil}
+
+    test "list_matches/1 returns all scoped matches" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      match = match_fixture(scope)
+      other_match = match_fixture(other_scope)
+      assert Tournaments.list_matches(scope) == [match]
+      assert Tournaments.list_matches(other_scope) == [other_match]
+    end
+
+    test "get_match!/2 returns the match with given id" do
+      scope = user_scope_fixture()
+      match = match_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Tournaments.get_match!(scope, match.id) == match
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_match!(other_scope, match.id) end
+    end
+
+    test "create_match/2 with valid data creates a match" do
+      valid_attrs = %{kickoff_at: ~U[2026-06-26 19:08:00Z], score_a: 42, score_b: 42}
+      scope = user_scope_fixture()
+
+      assert {:ok, %Match{} = match} = Tournaments.create_match(scope, valid_attrs)
+      assert match.kickoff_at == ~U[2026-06-26 19:08:00Z]
+      assert match.score_a == 42
+      assert match.score_b == 42
+      assert match.user_id == scope.user.id
+    end
+
+    test "create_match/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      assert {:error, %Ecto.Changeset{}} = Tournaments.create_match(scope, @invalid_attrs)
+    end
+
+    test "update_match/3 with valid data updates the match" do
+      scope = user_scope_fixture()
+      match = match_fixture(scope)
+      update_attrs = %{kickoff_at: ~U[2026-06-27 19:08:00Z], score_a: 43, score_b: 43}
+
+      assert {:ok, %Match{} = match} = Tournaments.update_match(scope, match, update_attrs)
+      assert match.kickoff_at == ~U[2026-06-27 19:08:00Z]
+      assert match.score_a == 43
+      assert match.score_b == 43
+    end
+
+    test "update_match/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      match = match_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Tournaments.update_match(other_scope, match, %{})
+      end
+    end
+
+    test "update_match/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      match = match_fixture(scope)
+      assert {:error, %Ecto.Changeset{}} = Tournaments.update_match(scope, match, @invalid_attrs)
+      assert match == Tournaments.get_match!(scope, match.id)
+    end
+
+    test "delete_match/2 deletes the match" do
+      scope = user_scope_fixture()
+      match = match_fixture(scope)
+      assert {:ok, %Match{}} = Tournaments.delete_match(scope, match)
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_match!(scope, match.id) end
+    end
+
+    test "delete_match/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      match = match_fixture(scope)
+      assert_raise MatchError, fn -> Tournaments.delete_match(other_scope, match) end
+    end
+
+    test "change_match/2 returns a match changeset" do
+      scope = user_scope_fixture()
+      match = match_fixture(scope)
+      assert %Ecto.Changeset{} = Tournaments.change_match(scope, match)
+    end
+  end
 end

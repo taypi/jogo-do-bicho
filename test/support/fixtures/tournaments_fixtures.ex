@@ -60,4 +60,19 @@ defmodule JogoDoBicho.TournamentsFixtures do
     {:ok, slot} = JogoDoBicho.Tournaments.create_slot(scope, attrs)
     slot
   end
+
+  @doc """
+  Generate a match.
+  """
+  def match_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        kickoff_at: ~U[2026-06-26 19:08:00Z],
+        score_a: 42,
+        score_b: 42
+      })
+
+    {:ok, match} = JogoDoBicho.Tournaments.create_match(scope, attrs)
+    match
+  end
 end
