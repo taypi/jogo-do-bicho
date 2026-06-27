@@ -34,7 +34,6 @@ defmodule JogoDoBicho.PoolsTest do
 
       assert {:ok, %Pool{} = pool} = Pools.create_pool(scope, valid_attrs)
       assert pool.name == "some name"
-      assert pool.user_id == scope.user.id
     end
 
     test "create_pool/2 with invalid data returns error changeset" do

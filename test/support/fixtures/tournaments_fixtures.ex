@@ -45,4 +45,19 @@ defmodule JogoDoBicho.TournamentsFixtures do
     {:ok, stage} = JogoDoBicho.Tournaments.create_stage(scope, attrs)
     stage
   end
+
+  @doc """
+  Generate a slot.
+  """
+  def slot_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        kind: "some kind",
+        source_match_id: "7488a646-e31f-11e4-aace-600308960662",
+        source_position: 42
+      })
+
+    {:ok, slot} = JogoDoBicho.Tournaments.create_slot(scope, attrs)
+    slot
+  end
 end

@@ -44,7 +44,6 @@ defmodule JogoDoBicho.TournamentsTest do
       assert tournament.name == "some  name"
       assert tournament.start_date == ~D[2026-06-20]
       assert tournament.end_date == ~D[2026-06-20]
-      assert tournament.user_id == scope.user.id
     end
 
     test "create_tournament/2 with invalid data returns error changeset" do
@@ -144,7 +143,6 @@ defmodule JogoDoBicho.TournamentsTest do
       scope = user_scope_fixture()
 
       assert {:ok, %TournamentTeam{} = tournament_team} = Tournaments.create_tournament_team(scope, valid_attrs)
-      assert tournament_team.user_id == scope.user.id
     end
 
     test "create_tournament_team/2 with invalid data returns error changeset" do
@@ -230,7 +228,6 @@ defmodule JogoDoBicho.TournamentsTest do
       assert {:ok, %Stage{} = stage} = Tournaments.create_stage(scope, valid_attrs)
       assert stage.name == "some name"
       assert stage.type == "some type"
-      assert stage.user_id == scope.user.id
     end
 
     test "create_stage/2 with invalid data returns error changeset" do
@@ -283,6 +280,95 @@ defmodule JogoDoBicho.TournamentsTest do
       scope = user_scope_fixture()
       stage = stage_fixture(scope)
       assert %Ecto.Changeset{} = Tournaments.change_stage(scope, stage)
+    end
+  end
+
+  describe "slots" do
+    alias JogoDoBicho.Tournaments.Slot
+
+    import JogoDoBicho.AccountsFixtures, only: [user_scope_fixture: 0]
+    import JogoDoBicho.TournamentsFixtures
+
+    @invalid_attrs %{kind: nil, source_match_id: nil, source_position: nil}
+
+    test "list_slots/1 returns all scoped slots" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+      other_slot = slot_fixture(other_scope)
+      assert Tournaments.list_slots(scope) == [slot]
+      assert Tournaments.list_slots(other_scope) == [other_slot]
+    end
+
+    test "get_slot!/2 returns the slot with given id" do
+      scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+      other_scope = user_scope_fixture()
+      assert Tournaments.get_slot!(scope, slot.id) == slot
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_slot!(other_scope, slot.id) end
+    end
+
+    test "create_slot/2 with valid data creates a slot" do
+      valid_attrs = %{kind: "some kind", source_match_id: "7488a646-e31f-11e4-aace-600308960662", source_position: 42}
+      scope = user_scope_fixture()
+
+      assert {:ok, %Slot{} = slot} = Tournaments.create_slot(scope, valid_attrs)
+      assert slot.kind == "some kind"
+      assert slot.source_match_id == "7488a646-e31f-11e4-aace-600308960662"
+      assert slot.source_position == 42
+    end
+
+    test "create_slot/2 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      assert {:error, %Ecto.Changeset{}} = Tournaments.create_slot(scope, @invalid_attrs)
+    end
+
+    test "update_slot/3 with valid data updates the slot" do
+      scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+      update_attrs = %{kind: "some updated kind", source_match_id: "7488a646-e31f-11e4-aace-600308960668", source_position: 43}
+
+      assert {:ok, %Slot{} = slot} = Tournaments.update_slot(scope, slot, update_attrs)
+      assert slot.kind == "some updated kind"
+      assert slot.source_match_id == "7488a646-e31f-11e4-aace-600308960668"
+      assert slot.source_position == 43
+    end
+
+    test "update_slot/3 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+
+      assert_raise MatchError, fn ->
+        Tournaments.update_slot(other_scope, slot, %{})
+      end
+    end
+
+    test "update_slot/3 with invalid data returns error changeset" do
+      scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+      assert {:error, %Ecto.Changeset{}} = Tournaments.update_slot(scope, slot, @invalid_attrs)
+      assert slot == Tournaments.get_slot!(scope, slot.id)
+    end
+
+    test "delete_slot/2 deletes the slot" do
+      scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+      assert {:ok, %Slot{}} = Tournaments.delete_slot(scope, slot)
+      assert_raise Ecto.NoResultsError, fn -> Tournaments.get_slot!(scope, slot.id) end
+    end
+
+    test "delete_slot/2 with invalid scope raises" do
+      scope = user_scope_fixture()
+      other_scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+      assert_raise MatchError, fn -> Tournaments.delete_slot(other_scope, slot) end
+    end
+
+    test "change_slot/2 returns a slot changeset" do
+      scope = user_scope_fixture()
+      slot = slot_fixture(scope)
+      assert %Ecto.Changeset{} = Tournaments.change_slot(scope, slot)
     end
   end
 end

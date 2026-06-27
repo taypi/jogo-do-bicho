@@ -74,14 +74,10 @@ defmodule JogoDoBicho.Teams do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_team(%Scope{} = scope, attrs) do
-    with {:ok, team = %Team{}} <-
-           %Team{}
-           |> Team.changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_team(scope, {:created, team})
-      {:ok, team}
-    end
+  def create_team(attrs) do
+    %Team{}
+    |> Team.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -96,16 +92,10 @@ defmodule JogoDoBicho.Teams do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_team(%Scope{} = scope, %Team{} = team, attrs) do
-    true = team.user_id == scope.user.id
-
-    with {:ok, team = %Team{}} <-
-           team
-           |> Team.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_team(scope, {:updated, team})
-      {:ok, team}
-    end
+  def update_team(%Team{} = team, attrs) do
+    team
+    |> Team.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -120,14 +110,8 @@ defmodule JogoDoBicho.Teams do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_team(%Scope{} = scope, %Team{} = team) do
-    true = team.user_id == scope.user.id
-
-    with {:ok, team = %Team{}} <-
-           Repo.delete(team) do
-      broadcast_team(scope, {:deleted, team})
-      {:ok, team}
-    end
+  def delete_team(%Team{} = team) do
+    Repo.delete(team)
   end
 
   @doc """
@@ -139,9 +123,7 @@ defmodule JogoDoBicho.Teams do
       %Ecto.Changeset{data: %Team{}}
 
   """
-  def change_team(%Scope{} = scope, %Team{} = team, attrs \\ %{}) do
-    true = team.user_id == scope.user.id
-
-    Team.changeset(team, attrs, scope)
+  def change_team(%Team{} = team, attrs \\ %{}) do
+    Team.changeset(team, attrs)
   end
 end

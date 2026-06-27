@@ -35,7 +35,6 @@ defmodule JogoDoBicho.TeamsTest do
       assert {:ok, %Team{} = team} = Teams.create_team(scope, valid_attrs)
       assert team.code == "some code"
       assert team.name == "some name"
-      assert team.user_id == scope.user.id
     end
 
     test "create_team/2 with invalid data returns error changeset" do

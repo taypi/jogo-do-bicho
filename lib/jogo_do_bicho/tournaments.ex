@@ -112,14 +112,10 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_tournament_team(%Scope{} = scope, attrs) do
-    with {:ok, tournament_team = %TournamentTeam{}} <-
-           %TournamentTeam{}
-           |> TournamentTeam.changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_tournament_team(scope, {:created, tournament_team})
-      {:ok, tournament_team}
-    end
+  def create_tournament_team(attrs) do
+    %TournamentTeam{}
+    |> TournamentTeam.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -134,16 +130,10 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_tournament_team(%Scope{} = scope, %TournamentTeam{} = tournament_team, attrs) do
-    true = tournament_team.user_id == scope.user.id
-
-    with {:ok, tournament_team = %TournamentTeam{}} <-
-           tournament_team
-           |> TournamentTeam.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_tournament_team(scope, {:updated, tournament_team})
-      {:ok, tournament_team}
-    end
+  def update_tournament_team(tournament_team, attrs) do
+    tournament_team
+    |> TournamentTeam.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -158,14 +148,8 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_tournament_team(%Scope{} = scope, %TournamentTeam{} = tournament_team) do
-    true = tournament_team.user_id == scope.user.id
-
-    with {:ok, tournament_team = %TournamentTeam{}} <-
-           Repo.delete(tournament_team) do
-      broadcast_tournament_team(scope, {:deleted, tournament_team})
-      {:ok, tournament_team}
-    end
+  def delete_tournament_team(tournament_team) do
+    Repo.delete(tournament_team)
   end
 
   @doc """
@@ -177,10 +161,8 @@ end
       %Ecto.Changeset{data: %TournamentTeam{}}
 
   """
-  def change_tournament_team(%Scope{} = scope, %TournamentTeam{} = tournament_team, attrs \\ %{}) do
-    true = tournament_team.user_id == scope.user.id
-
-    TournamentTeam.changeset(tournament_team, attrs, scope)
+  def change_tournament_team(tournament_team, attrs \\ %{}) do
+    TournamentTeam.changeset(tournament_team, attrs)
   end
 
   alias JogoDoBicho.Tournaments.Stage
@@ -251,14 +233,10 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_stage(%Scope{} = scope, attrs) do
-    with {:ok, stage = %Stage{}} <-
-           %Stage{}
-           |> Stage.changeset(attrs, scope)
-           |> Repo.insert() do
-      broadcast_stage(scope, {:created, stage})
-      {:ok, stage}
-    end
+  def create_stage(attrs) do
+    %Stage{}
+    |> Stage.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
@@ -273,16 +251,10 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_stage(%Scope{} = scope, %Stage{} = stage, attrs) do
-    true = stage.user_id == scope.user.id
-
-    with {:ok, stage = %Stage{}} <-
-           stage
-           |> Stage.changeset(attrs, scope)
-           |> Repo.update() do
-      broadcast_stage(scope, {:updated, stage})
-      {:ok, stage}
-    end
+  def update_stage(%Stage{} = stage, attrs) do
+    stage
+    |> Stage.changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -297,14 +269,8 @@ end
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_stage(%Scope{} = scope, %Stage{} = stage) do
-    true = stage.user_id == scope.user.id
-
-    with {:ok, stage = %Stage{}} <-
-           Repo.delete(stage) do
-      broadcast_stage(scope, {:deleted, stage})
-      {:ok, stage}
-    end
+  def delete_stage(%Stage{} = stage) do
+    Repo.delete(stage)
   end
 
   @doc """
@@ -316,9 +282,128 @@ end
       %Ecto.Changeset{data: %Stage{}}
 
   """
-  def change_stage(%Scope{} = scope, %Stage{} = stage, attrs \\ %{}) do
-    true = stage.user_id == scope.user.id
+  def change_stage(%Stage{} = stage, attrs \\ %{}) do
+    Stage.changeset(stage, attrs)
+  end
 
-    Stage.changeset(stage, attrs, scope)
+  alias JogoDoBicho.Tournaments.Slot
+  alias JogoDoBicho.Accounts.Scope
+
+  @doc """
+  Subscribes to scoped notifications about any slot changes.
+
+  The broadcasted messages match the pattern:
+
+    * {:created, %Slot{}}
+    * {:updated, %Slot{}}
+    * {:deleted, %Slot{}}
+
+  """
+  def subscribe_slots(%Scope{} = scope) do
+    key = scope.user.id
+
+    Phoenix.PubSub.subscribe(JogoDoBicho.PubSub, "user:#{key}:slots")
+  end
+
+  defp broadcast_slot(%Scope{} = scope, message) do
+    key = scope.user.id
+
+    Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:slots", message)
+  end
+
+  @doc """
+  Returns the list of slots.
+
+  ## Examples
+
+      iex> list_slots(scope)
+      [%Slot{}, ...]
+
+  """
+  def list_slots(%Scope{} = scope) do
+    Repo.all_by(Slot, user_id: scope.user.id)
+  end
+
+  @doc """
+  Gets a single slot.
+
+  Raises `Ecto.NoResultsError` if the Slot does not exist.
+
+  ## Examples
+
+      iex> get_slot!(scope, 123)
+      %Slot{}
+
+      iex> get_slot!(scope, 456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_slot!(%Scope{} = scope, id) do
+    Repo.get_by!(Slot, id: id, user_id: scope.user.id)
+  end
+
+  @doc """
+  Creates a slot.
+
+  ## Examples
+
+      iex> create_slot(scope, %{field: value})
+      {:ok, %Slot{}}
+
+      iex> create_slot(scope, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_slot(attrs) do
+    %Slot{}
+    |> Slot.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a slot.
+
+  ## Examples
+
+      iex> update_slot(scope, slot, %{field: new_value})
+      {:ok, %Slot{}}
+
+      iex> update_slot(scope, slot, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_slot(%Slot{} = slot, attrs) do
+    slot
+    |> Slot.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a slot.
+
+  ## Examples
+
+      iex> delete_slot(scope, slot)
+      {:ok, %Slot{}}
+
+      iex> delete_slot(scope, slot)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_slot(%Slot{} = slot) do
+    Repo.delete(slot)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking slot changes.
+
+  ## Examples
+
+      iex> change_slot(scope, slot)
+      %Ecto.Changeset{data: %Slot{}}
+
+  """
+  def change_slot(%Slot{} = slot, attrs \\ %{}) do
+    Slot.changeset(slot, attrs)
   end
 end

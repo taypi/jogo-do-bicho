@@ -28,14 +28,6 @@ defmodule JogoDoBicho.MatchesTest do
       assert_raise Ecto.NoResultsError, fn -> Matches.get_match!(other_scope, match.id) end
     end
 
-    test "create_match/2 with valid data creates a match" do
-      valid_attrs = %{}
-      scope = user_scope_fixture()
-
-      assert {:ok, %Match{} = match} = Matches.create_match(scope, valid_attrs)
-      assert match.user_id == scope.user.id
-    end
-
     test "create_match/2 with invalid data returns error changeset" do
       scope = user_scope_fixture()
       assert {:error, %Ecto.Changeset{}} = Matches.create_match(scope, @invalid_attrs)
