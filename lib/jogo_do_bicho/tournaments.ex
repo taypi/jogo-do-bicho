@@ -63,11 +63,11 @@ end
     Phoenix.PubSub.subscribe(JogoDoBicho.PubSub, "user:#{key}:tournament_teams")
   end
 
-  defp broadcast_tournament_team(%Scope{} = scope, message) do
-    key = scope.user.id
+  # defp broadcast_tournament_team(%Scope{} = scope, message) do
+  #   key = scope.user.id
 
-    Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:tournament_teams", message)
-  end
+  #   Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:tournament_teams", message)
+  # end
 
   @doc """
   Returns the list of tournament_teams.
@@ -184,11 +184,11 @@ end
     Phoenix.PubSub.subscribe(JogoDoBicho.PubSub, "user:#{key}:stages")
   end
 
-  defp broadcast_stage(%Scope{} = scope, message) do
-    key = scope.user.id
+  # defp broadcast_stage(%Scope{} = scope, message) do
+  #   key = scope.user.id
 
-    Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:stages", message)
-  end
+  #   Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:stages", message)
+  # end
 
   @doc """
   Returns the list of stages.
@@ -305,11 +305,11 @@ end
     Phoenix.PubSub.subscribe(JogoDoBicho.PubSub, "user:#{key}:slots")
   end
 
-  defp broadcast_slot(%Scope{} = scope, message) do
-    key = scope.user.id
+  # defp broadcast_slot(%Scope{} = scope, message) do
+  #   key = scope.user.id
 
-    Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:slots", message)
-  end
+  #   Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:slots", message)
+  # end
 
   @doc """
   Returns the list of slots.

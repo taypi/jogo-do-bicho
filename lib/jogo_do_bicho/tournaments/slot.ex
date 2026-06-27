@@ -10,7 +10,7 @@ defmodule JogoDoBicho.Tournaments.Slot do
   schema "slots" do
     field :source_position, :integer
     field :source_match_id, Ecto.UUID
-    field :type, Ecto.Enum, values: [:team, :group_position, :winner]
+    field :type, Ecto.Enum, values: [:team, :group_position, :match_winner]
 
     belongs_to :tournament, Tournament
     belongs_to :team, Team
@@ -29,6 +29,9 @@ defmodule JogoDoBicho.Tournaments.Slot do
       :team_id,
       :source_stage_id
     ])
+    |> foreign_key_constraint(:tournament_id)
+    |> foreign_key_constraint(:team_id)
+    |> foreign_key_constraint(:source_stage_id)
     |> validate_required([:type, :tournament_id])
     |> validate_type_constraints()
   end
@@ -41,7 +44,7 @@ defmodule JogoDoBicho.Tournaments.Slot do
       :group_position ->
         validate_required(changeset, [:source_stage_id, :source_position])
 
-      :winner ->
+      :match_winner ->
         validate_required(changeset, [:source_match_id])
 
       _ ->

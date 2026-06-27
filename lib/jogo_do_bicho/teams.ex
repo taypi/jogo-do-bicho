@@ -25,11 +25,11 @@ defmodule JogoDoBicho.Teams do
     Phoenix.PubSub.subscribe(JogoDoBicho.PubSub, "user:#{key}:teams")
   end
 
-  defp broadcast_team(%Scope{} = scope, message) do
-    key = scope.user.id
+  # defp broadcast_team(%Scope{} = scope, message) do
+  #   key = scope.user.id
 
-    Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:teams", message)
-  end
+  #   Phoenix.PubSub.broadcast(JogoDoBicho.PubSub, "user:#{key}:teams", message)
+  # end
 
   @doc """
   Returns the list of teams.
